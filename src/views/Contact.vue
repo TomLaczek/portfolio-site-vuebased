@@ -34,7 +34,7 @@
                         <v-form ref="form" lazy-validation @submit.prevent="handleSubmit(submit)" @reset.prevent="reset">
                             <v-row class="justify-center">
                                 <v-col cols="12" sm="12" md="6">
-                                    <ValidationProvider v-slot="{ errors }" name="name" rules="required|min:3|max:15|alpha">
+                                    <ValidationProvider v-slot="{ errors }" name="name" rules="required|alpha|min:3|max:15">
                                         <v-text-field
                                             label="Imię"
                                             :error-messages="errors"
@@ -44,7 +44,7 @@
                                     </ValidationProvider>
                                 </v-col>
                                 <v-col cols="12" sm="12" md="6">
-                                    <ValidationProvider v-slot="{ errors }" name="lastname" rules="required|min:3|max:15|alpha">
+                                    <ValidationProvider v-slot="{ errors }" name="lastname" rules="required|alpha|min:3|max:15">
                                         <v-text-field
                                             label="Nazwisko"
                                             :error-messages="errors"
@@ -73,7 +73,7 @@
                                     </ValidationProvider>
                                 </v-col>
                                 <v-col cols="12" sm="12" md="12">
-                                    <ValidationProvider v-slot="{ errors }" name="text" rules="required|min:10|alpha_dash">
+                                    <ValidationProvider v-slot="{ errors }" name="text" rules="required|alpha_spaces|min:10">
                                     <v-textarea
                                         label="Wiadomość"
                                         :error-messages="errors"
@@ -96,7 +96,7 @@
     </div>
 </template>
 <script>
-import { required, email, max, min, alpha, alpha_dash, numeric } from 'vee-validate/dist/rules'
+import { required, email, max, min, alpha, alpha_spaces, numeric } from 'vee-validate/dist/rules'
 import { extend, ValidationObserver, ValidationProvider, setInteractionMode } from 'vee-validate'
 setInteractionMode('eager')
 extend('required', {
@@ -107,8 +107,8 @@ extend('alpha', {
     ...alpha,
     message: 'Tylko litery...',
 })
-extend('alpha_dash',{
-    ...alpha_dash,
+extend('alpha_spaces',{
+    ...alpha_spaces,
     message: 'Użyłeś niedozwolonego znaku :)'
 })
 extend('numeric',{
@@ -157,33 +157,35 @@ export default {
     methods:{
           submit() {
             this.$refs.observer.validate()
-            .then(()=>{
-                let postVars = {
-                    email: this.form.email,
-                    name: this.form.name,
-                    phone: this.form.phone,
-                    lastname: this.form.lastname,
-                    message: this.form.note
-                };
+            .then(success=>{
+                if(success){
+                    let postVars = {
+                        email: this.form.email,
+                        name: this.form.name,
+                        phone: this.form.phone,
+                        lastname: this.form.lastname,
+                        message: this.form.note
+                    };
 
-                const options = {
-                    method:'POST',
-                    headers:{
-                        'Accept': '*',
-                        'Content-Type': 'application/json;charset=UTF-8'
-                    },
-                    body:JSON.stringify(postVars)
-                }
-
-                fetch(this.endpoint,options)
-                .then(()=> {
-                    this.submitPossitive = true;
-                    this.$refs.observer.reset()
-                    this.$refs.form.reset()
-                })
-                .catch(()=> {
-                    this.submitError = true;
-                })
+                    const options = {
+                        method:'POST',
+                        headers:{
+                            'Accept': '*',
+                            'Content-Type': 'application/json;charset=UTF-8'
+                        },
+                        body:JSON.stringify(postVars)
+                    }
+                    
+                    fetch(this.endpoint,options)
+                    .then(()=> {
+                        this.submitPossitive = true;
+                        this.$refs.observer.reset()
+                        this.$refs.form.reset()
+                    })
+                    .catch(()=> {
+                        this.submitError = true;
+                    })
+                } else this.submitError = true;
             })
             .catch(()=> {
                 this.submitError = true;
