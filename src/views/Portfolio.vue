@@ -12,9 +12,20 @@
             </v-btn>
           </a>
       </v-row>
+      <v-row class="justify-center align-center mt-1 pt-1">
+        <v-col cols="12" sm="4">
+          <v-progress-linear
+            :active="loading"
+            :indeterminate="loading"
+            rounded
+            color="grey darken-2"
+            height="6"
+          ></v-progress-linear>
+        </v-col>
+      </v-row>
       <v-row class="justify-center align-center mb-2 pb-3">
-        <v-col cols="12" xs="12">
-          <pdf :src="tomsCv"></pdf>
+        <v-col cols="12" sm="10" offset-sm-1>
+          <pdf :src="tomsCv" @loaded="loading=false"></pdf>
         </v-col>
       </v-row>
     </v-container>
@@ -29,6 +40,7 @@ export default {
     },
     data() {
         return {
+            loading:true,
             tomsCv: '../../yoursCV.pdf'
         }
   }
